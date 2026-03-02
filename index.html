@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Sondagem SPT</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f2441;--blue:#1a4a8a;--mid:#2e6db4;--accent:#c8a850;
+  --sand:#f5f1e6;--bg:#e0dcd0;--ink:#1a1814;--muted:#6b6560;
+  --white:#fff;--err:#c0392b;
+}
+html{font-size:14px}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.app-header{background:var(--navy);padding:11px 22px;display:flex;align-items:center;gap:14px;border-bottom:3px solid var(--accent);position:sticky;top:0;z-index:200}
+.app-header h1{font-size:.95rem;font-weight:600;color:#fff;letter-spacing:.04em}
+.badge{background:var(--accent);color:var(--navy);font-size:.62rem;font-weight:800;padding:2px 7px;border-radius:2px;letter-spacing:.1em}
+.tab-bar{background:var(--blue);display:flex;border-bottom:2px solid var(--accent)}
+.tab-btn{font-family:inherit;font-size:.76rem;font-weight:600;padding:8px 16px;border:none;cursor:pointer;background:transparent;color:rgba(255,255,255,.55);letter-spacing:.03em;border-bottom:3px solid transparent;transition:all .15s;margin-bottom:-2px}
+.tab-btn:hover{color:#fff;background:rgba(255,255,255,.08)}
+.tab-btn.active{color:#fff;border-bottom-color:var(--accent);background:rgba(255,255,255,.1)}
+.tab-content{display:none}
+.tab-content.active{display:flex;height:calc(100vh - 86px)}
+.sidebar{background:var(--sand);width:370px;min-width:370px;border-right:1px solid #c8c0a8;overflow-y:auto;padding-bottom:40px}
+.preview-area{flex:1;background:var(--bg);overflow:auto;padding:22px;display:flex;flex-direction:column;align-items:center}
+.toolbar{background:rgba(15,36,65,.92);padding:5px 12px;display:flex;gap:7px;flex-wrap:wrap;align-items:center;border-bottom:1px solid rgba(255,255,255,.1)}
+.btn{font-family:inherit;font-size:.73rem;font-weight:600;padding:5px 13px;border:none;border-radius:3px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px}
+.btn-primary{background:var(--accent);color:var(--navy)}.btn-primary:hover{background:#d4b45c}
+.btn-ghost{background:rgba(255,255,255,.14);color:#fff}.btn-ghost:hover{background:rgba(255,255,255,.24)}
+.btn-danger{background:rgba(192,57,43,.75);color:#fff}.btn-danger:hover{background:var(--err)}
+.custom-select{background:rgba(255,255,255,.14);color:#fff;border:none;font-size:.73rem;font-weight:600;padding:4px 8px;border-radius:3px;cursor:pointer;outline:none;}
+.custom-select:hover{background:rgba(255,255,255,.24)}
+.custom-select option{color:#111;background:#fff;}
+.panel{border-bottom:1px solid #c8c0a8}
+.panel-hdr{padding:8px 13px;background:var(--navy);color:#fff;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.panel-hdr:hover{background:var(--blue)}
+.panel-body{padding:11px 13px}
+.panel-body.collapsed{display:none}
+.fg{margin-bottom:8px}
+.fg label{display:block;font-size:.67rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.fg input,.fg select,.fg textarea{width:100%;font-family:'IBM Plex Mono',monospace;font-size:.74rem;color:var(--ink);background:#fff;border:1px solid #b8b0a0;border-radius:3px;padding:5px 7px;transition:border .15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--mid);box-shadow:0 0 0 2px rgba(46,109,180,.16)}
+.fg textarea{resize:vertical;min-height:46px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
+.sep{height:1px;background:#c8c0a8;margin:7px 0}
+/* logos */
+.logo-box{border:2px dashed #b8b0a0;border-radius:4px;padding:8px;text-align:center;cursor:pointer;transition:all .15s;background:#fff;position:relative;min-height:52px;display:flex;align-items:center;justify-content:center}
+.logo-box:hover{border-color:var(--mid);background:#e8f2fb}
+.logo-box img{max-height:48px;max-width:100%;object-fit:contain}
+.logo-box .ph{font-size:.67rem;color:var(--muted);pointer-events:none;line-height:1.4}
+.logo-box input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.logo-clr{font-size:.62rem;color:var(--err);cursor:pointer;margin-top:3px;display:none;text-align:center}
+/* column manager */
+.col-manager{display:flex;flex-direction:column;gap:4px}
+.col-item{display:flex;align-items:center;gap:6px;padding:5px 7px;background:#fff;border:1px solid #c8c0a8;border-radius:3px;cursor:grab;user-select:none;font-size:.72rem}
+.col-item.dragging{opacity:.4;background:#deeaf7}
+.col-item.drag-over{border-color:var(--mid);border-style:dashed}
+.col-item input[type=checkbox]{cursor:pointer;margin:0}
+.col-item .drag-handle{color:#bbb;font-size:.9rem;cursor:grab;flex-shrink:0}
+.col-item .col-label{flex:1;font-family:'IBM Plex Mono',monospace;font-size:.7rem}
+/* SPT table */
+.spt-wrap{overflow-x:auto;margin:0 -2px}
+.spt-tbl{width:100%;border-collapse:collapse;font-size:.65rem;font-family:'IBM Plex Mono',monospace}
+.spt-tbl th{background:var(--navy);color:#fff;padding:4px 2px;text-align:center;font-size:.56rem;letter-spacing:.02em;white-space:nowrap}
+.spt-tbl td{border:1px solid #c8c0a8;padding:1px 1px;text-align:center}
+.spt-tbl td.row-num{background:#ece8dc;font-weight:700;color:var(--muted);width:16px;font-size:.6rem}
+.spt-tbl input{width:100%;border:none;background:transparent;font-family:'IBM Plex Mono',monospace;font-size:.65rem;text-align:center;color:var(--ink);padding:1px}
+.spt-tbl input:focus{outline:2px solid var(--mid);border-radius:1px}
+.spt-tbl tr:nth-child(even) td{background:#f4f0e4}
+.spt-tbl tr:nth-child(even) td:first-child{background:#e4e0d4}
+/* camadas table */
+.cam-tbl{width:100%;border-collapse:collapse;font-size:.65rem;font-family:'IBM Plex Mono',monospace;margin-top:4px}
+.cam-tbl th{background:var(--blue);color:#fff;padding:3px 4px;text-align:center;font-size:.57rem;white-space:nowrap}
+.cam-tbl td{border:1px solid #c8c0a8;padding:1px 2px}
+.cam-tbl input{width:100%;border:none;background:transparent;font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--ink);padding:1px;text-align:center}
+.cam-tbl input.left{text-align:left}
+.cam-tbl input:focus{outline:2px solid var(--mid);border-radius:1px}
+.cam-tbl tr:nth-child(even) td{background:#f4f0e4}
+/* color dot */
+.sc-dot{width:16px;height:16px;border-radius:2px;cursor:pointer;border:1.5px solid #888;display:inline-block;vertical-align:middle;transition:transform .1s}
+.sc-dot:hover{transform:scale(1.18)}
+/* color popup */
+#color-popup{display:none;position:fixed;z-index:9999;background:#fff;border:1.5px solid #999;border-radius:6px;padding:10px;box-shadow:0 4px 24px rgba(0,0,0,.28);width:192px}
+.soil-palette{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+.soil-palette button{width:22px;height:22px;border:1.5px solid #aaa;border-radius:2px;cursor:pointer;transition:transform .1s;padding:0}
+.soil-palette button:hover{transform:scale(1.15);border-color:#333}
+/* report */
+.report-sheet{background:#fff;width:210mm;box-shadow:0 4px 32px rgba(0,0,0,.18);border:1px solid #c0b8a8;font-family:'IBM Plex Sans',sans-serif;font-size:7.5pt;color:#111;padding:10px;margin-bottom:20px;}
+/* help */
+.help-area{flex:1;overflow-y:auto;padding:28px 36px;background:var(--sand)}
+.help-area h2{font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:14px;border-bottom:2px solid var(--accent);padding-bottom:5px}
+.help-area h3{font-size:.88rem;font-weight:700;color:var(--blue);margin:18px 0 7px}
+.help-area p,.help-area li{font-size:.82rem;line-height:1.65;color:var(--ink);margin-bottom:5px}
+.help-area ul,.help-area ol{padding-left:18px}
+.tip{background:#e8f2fb;border-left:4px solid var(--mid);padding:9px 13px;border-radius:0 4px 4px 0;margin:9px 0;font-size:.8rem}
+.help-area table{width:100%;border-collapse:collapse;font-size:.76rem;margin:8px 0}
+.help-area th{background:var(--navy);color:#fff;padding:5px 9px;text-align:left}
+.help-area td{border:1px solid #c8c0a8;padding:4px 9px}
+.help-area tr:nth-child(even) td{background:#f0ede4}
+.kbd{display:inline-block;background:var(--navy);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:.68rem;padding:2px 6px;border-radius:3px;margin:0 2px}
+.sdot{width:16px;height:16px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:3px;border:1px solid #aaa}
+@media print{
+  .app-header,.tab-bar,.toolbar,.sidebar{display:none!important}
+  .tab-content{display:flex!important;height:auto}
+  .preview-area{padding:0;background:#fff}
+  .report-sheet{box-shadow:none;border:none;}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="badge">SPT-PLOT</div>
+  <h1>Gerador de Relatório de Sondagem a Percussão</h1>
+  <div style="font-size:5pt; color:#aaa; font-style:italic; font-family:'IBM Plex Sans',sans-serif; letter-spacing:.02em; padding-left:2mm; margin-top:2px; text-align:left;">SPT-PLOT v.1.0.0 — Desenvolvido por Eng. Me. João Víctor Santana</div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('editor',this)">✏️ Editor</button>
+  <button class="tab-btn" onclick="switchTab('help',this)">📖 Guia de Uso</button>
+</div>
+
+<div class="tab-content active" id="tab-editor">
+<div class="sidebar">
+
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="generateReport()">▶ Gerar</button>
+    <button class="btn btn-ghost" onclick="abrirArquivo()">📂 Abrir</button>
+    <button class="btn btn-ghost" onclick="salvar()">💾 Salvar</button>
+    <button class="btn btn-ghost" onclick="exportarPDF()">📄 PDF</button>
+    <select class="custom-select" onchange="if(this.value){ loadExample(parseInt(this.value)); this.value=''; }">
+      <option value="">📂 Exemplos...</option>
+      <option value="1">Ex 1: Sondagem SP51AT</option>
+      <option value="2">Ex 2: Sondagem SP50</option>
+      <option value="3">Ex 3: Sondagem SP49</option>
+    </select>
+    <button class="btn btn-danger" onclick="clearAll()">✕</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-hdr" onclick="togglePanel(this)">🖼 Logos <span>▾</span></div>
+    <div class="panel-body">
+      <div class="g2">
+        <div>
+          <div class="fg"><label>Empresa Executora</label></div>
+          <div class="logo-box" id="lb-empresa">
+            <img id="li-empresa" style="display:none">
+            <div class="ph" id="lp-empresa">📁 Clique<br><small>PNG/JPG/SVG</small></div>
+            <input type="file" accept="image/*" onchange="loadLogo('empresa',this)">
+          </div>
+          <div class="logo-clr" id="lc-empresa" onclick="clearLogo('empresa')">✕ Remover</div>
+        </div>
+        <div>
+          <div class="fg"><label>Cliente</label></div>
+          <div class="logo-box" id="lb-cliente">
+            <img id="li-cliente" style="display:none">
+            <div class="ph" id="lp-cliente">📁 Clique<br><small>PNG/JPG/SVG</small></div>
+            <input type="file" accept="image/*" onchange="loadLogo('cliente',this)">
+          </div>
+          <div class="logo-clr" id="lc-cliente" onclick="clearLogo('cliente')">✕ Remover</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-hdr" onclick="togglePanel(this)">🏢 Empresa Executora <span>▾</span></div>
+    <div class="panel-body">
+      <div class="fg"><label>Nome</label><input type="text" id="empresa_nome" placeholder="Ex: Bergson Matias Eng. Estrutural"></div>
+      <div class="fg"><label>Subtítulo da Empresa</label><input type="text" id="empresa_sub" placeholder="ex: Consultoria e Sustentabilidade"></div>
+      <div class="g2">
+        <div class="fg"><label>CREA</label><input type="text" id="empresa_crea" placeholder="CE:322710"></div>
+        <div class="fg"><label>Eng. Responsável</label><input type="text" id="resp_nome" placeholder="Nome completo"></div>
+      </div>
+      <div class="fg"><label>Endereço</label><input type="text" id="empresa_end" placeholder="Rua, nº, cidade - UF"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-hdr" onclick="togglePanel(this)">📋 Cliente e Obra <span>▾</span></div>
+    <div class="panel-body">
+      <div class="fg"><label>Cliente</label><input type="text" id="cliente"></div>
+      <div class="fg"><label>Obra</label><input type="text" id="obra"></div>
+      <div class="fg"><label>Local</label><input type="text" id="local"></div>
+      <div class="g2">
+        <div class="fg"><label>Relatório N°</label><input type="text" id="relatorio_num" placeholder="001/2024"></div>
+        <div class="fg"><label>Folha</label><input type="text" id="folha" value="01"></div>
+      </div>
+      <div class="fg"><label>Data de Emissão</label><input type="date" id="data_emissao"></div>
+      <div class="fg"><label>Observações</label><textarea id="observacoes" placeholder="Observações do furo"></textarea></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-hdr" onclick="togglePanel(this)">🔩 Dados do Furo <span>▾</span></div>
+    <div class="panel-body">
+      <div class="g3">
+        <div class="fg"><label>Furo N°</label><input type="text" id="furo_num" placeholder="SP 01"></div>
+        <div class="fg"><label>Cota (m)</label><input type="number" id="furo_cota" step="0.001"></div>
+        <div class="fg"><label>Prof. Total (m)</label><input type="number" id="prof_total" step="0.1" placeholder="20"></div>
+      </div>
+      <div style="background:#deeaf7;border-radius:4px;padding:8px;margin-bottom:8px;border:1px solid #aac8e8">
+        <div style="font-size:.67rem;font-weight:700;color:var(--navy);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em">💧 Nível d'Água (NA)</div>
+        <div class="g2">
+          <div class="fg" style="margin:0 0 5px"><label>NA Inicial (m/texto)</label><input type="text" id="na_ini" placeholder="Ex: 2.00 ou SECO"></div>
+          <div class="fg" style="margin:0 0 5px"><label>NA Final (m/texto)</label><input type="text" id="na_fin" placeholder="Ex: 3.00 ou N.F.O."></div>
+        </div>
+        <div class="g2">
+          <div class="fg" style="margin:0"><label>Data NA Ini.</label><input type="date" id="data_na_ini"></div>
+          <div class="fg" style="margin:0"><label>Data NA Fin.</label><input type="date" id="data_na_fin"></div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="fg"><label>Início</label><input type="date" id="data_inicio"></div>
+        <div class="fg"><label>Término</label><input type="date" id="data_termino"></div>
+      </div>
+      <div class="sep"></div>
+      <div class="g2">
+        <div class="fg"><label>Ø Ext.</label><input type="text" id="diam_ext" placeholder='2 3/8"'></div>
+        <div class="fg"><label>Ø Int.</label><input type="text" id="diam_int" placeholder='1 3/8"'></div>
+      </div>
+      <div class="g3">
+        <div class="fg"><label>Ø Haste</label><input type="text" id="diam_haste" placeholder='2"'></div>
+        <div class="fg"><label>Peso(kg)</label><input type="number" id="peso_mart"></div>
+        <div class="fg"><label>Queda(cm)</label><input type="number" id="alt_queda"></div>
+      </div>
+      <div class="fg"><label>Método de Cravação</label>
+        <input type="text" id="metodo_crav" placeholder="Ex: Trado Helicoidal, Lavagem...">
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-hdr" onclick="togglePanel(this)">🛡 Revestimento <span>▾</span></div>
+    <div class="panel-body">
+      <div id="revest-list"></div>
+      <button class="btn btn-ghost" style="width:100%;margin-top:5px;background:#d4cfc4;color:var(--navy);justify-content:center;font-size:.72rem" onclick="addRevestRow()">+ Adicionar Trecho</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-hdr" onclick="togglePanel(this)">⚙️ Colunas do Relatório <span>▾</span></div>
+    <div class="panel-body">
+      <p style="font-size:.67rem;color:var(--muted);margin-bottom:8px;line-height:1.4">
+        Arraste para reordenar. Desmarque para ocultar a coluna no relatório.
+      </p>
+      <div class="col-manager" id="col-manager"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-hdr" onclick="togglePanel(this)">🗂 Camadas de Solo <span>▾</span></div>
+    <div class="panel-body" style="padding:8px 7px">
+      <p style="font-size:.67rem;color:var(--muted);margin-bottom:6px;line-height:1.4">
+        Defina cada camada pela profundidade de início em metros (ex: 7.1). Independente das amostras SPT.<br>
+        <b>Dica:</b> Para exibir o limite de sondagem, crie a camada da quebra final e deixe a "Descrição" vazia.
+      </p>
+      <table class="cam-tbl">
+        <thead><tr>
+          <th>Prof. (m)</th>
+          <th>Descrição do Solo</th>
+          <th style="width:20px">Cor</th>
+          <th style="width:22px"></th>
+        </tr></thead>
+        <tbody id="cam-tbody"></tbody>
+      </table>
+      <button class="btn btn-ghost" style="width:100%;margin-top:6px;background:#d4cfc4;color:var(--navy);justify-content:center;font-size:.72rem" onclick="addCamadaRow()">+ Adicionar Camada</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-hdr" onclick="togglePanel(this)">📊 Dados SPT por Amostra <span>▾</span></div>
+    <div class="panel-body" style="padding:8px 6px">
+      <div class="g2" style="padding:0 7px;margin-bottom:7px">
+        <div class="fg"><label>Nº Amostras</label><input type="number" id="num_amostras" value="10" min="1" max="80" onchange="rebuildSptTable()"></div>
+        <div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-ghost" style="width:100%;background:#d4cfc4;color:var(--navy);font-size:.7rem;justify-content:center" onclick="rebuildSptTable()">↺ Recriar</button></div>
+      </div>
+      <p style="font-size:.62rem;color:var(--muted);padding:0 7px 3px;line-height:1.5">
+        <b>Ini</b> = SPT 1ª+2ª seq. &nbsp;|&nbsp; <b>Fin</b> = SPT 2ª+3ª seq.<br>
+        Impenetrável: adicione <b>!</b> ao final (ex: <b>46!</b> ou <b>30/10!</b>).<br>
+        O <b>!</b> não aparece no relatório impresso.
+      </p>
+      <div class="spt-wrap">
+        <table class="spt-tbl">
+          <thead><tr>
+            <th>#</th>
+            <th title="SPT 1ª+2ª — adicione ! para impenetrável">Ini</th>
+            <th title="SPT 2ª+3ª — valor N — adicione ! para impenetrável">Fin</th>
+            <th title="Prof. real do ensaio (deixe vazio = índice da amostra)">Prof.(m)</th>
+          </tr></thead>
+          <tbody id="spt-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><div class="preview-area" id="preview-area">
+  <div id="report-preview" style="color:var(--muted);text-align:center;padding:80px 20px;font-size:.9rem">
+    Preencha os dados e clique em <b>▶ Gerar</b>
+  </div>
+</div>
+</div><div class="tab-content" id="tab-help">
+<div class="help-area">
+  <h2>📖 Guia de Uso — Gerador de Relatório SPT</h2>
+  <div class="tip">Preencha o painel lateral e clique em <span class="kbd">▶ Gerar</span>. O relatório é atualizado a cada clique.</div>
+  
+  <h3>📈 Regra de Numeração Automática</h3>
+  <p>A numeração das amostras avança automaticamente. O diagrama é plotado sempre partindo da superfície (0 golpes a 0m) e os pontos são desenhados estritamente na profundidade da amostra (linha inferior da célula correspondente).</p>
+  
+  <h3>🛑 Limite de Sondagem (Impenetrável)</h3>
+  <p>Para exibir o bloco de <b>"LIMITE DE SONDAGEM IMPENETRÁVEL À PERCUSSÃO"</b>, basta adicionar a exclamação "!" ao dado (ex: <code>30/10!</code>) e criar uma camada com a profundidade de quebra deixando o campo de "Descrição do Solo" <b>vazio</b>. O sistema a auto-preencherá como limite de sondagem ocupando exato 1m de altura.</p>
+  
+  <h3>📏 Camadas Finas (Ajuste de Escala)</h3>
+  <p>Sempre que a diferença entre camadas for menor que 0.5m (ou não houver espaço suficiente para o texto), o sistema criará <b>linhas inclinadas automáticas (leader lines)</b> na coluna de Profundidade para conectar o nível real do solo à caixa de descrição, que é expandida para garantir excelente leitura do documento.</p>
+</div>
+</div>
+
+<div id="color-popup">
+  <div style="font-size:.7rem;font-weight:700;color:var(--navy);margin-bottom:5px">🎨 Cor do Solo</div>
+  <div class="soil-palette" id="soil-palette"></div>
+  <div style="margin-top:7px;display:flex;gap:6px;align-items:center">
+    <input type="color" id="custom-color" style="width:30px;height:22px;border:none;padding:0;cursor:pointer;border-radius:2px" value="#c8a850">
+    <span style="font-size:.68rem;color:var(--muted)">Cor personalizada</span>
+  </div>
+  <button onclick="closeColorPicker()" style="margin-top:6px;width:100%;font-size:.68rem;padding:3px;background:#eee;border:1px solid #ccc;border-radius:3px;cursor:pointer">Fechar</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const logos = {empresa: null, cliente: null};
+let activeColorTarget = null;
+const PALETTE = ['#d4c080','#c8a850','#d4956a','#b87048','#90b870','#6a9850','#b0c8e0','#7090b8','#8899aa',
+                 '#e8d8b0','#a07858','#e0b090','#a0a0a0','#808080','#707070',
+                 '#505050','#333333','#d0d8b0','#b8d0a0','#e8e0d0','#f5f0e6','#c8b8d8','#a890c8','#c0392b'];
+const DEF_CAM_COLORS = ['#c8a850','#d4956a','#8899aa','#90b870','#707070','#b0c8e0','#c0a080'];
+
+const ALL_COLS = [
+  {id:'revest',    label:'Revestimento',          vis: true,  w:'14px'},
+  {id:'cota_rn',   label:'Cota R.N.',             vis: true,  w:'34px'},
+  {id:'spt_ini',   label:'Índice SPT Inicial',   vis: true,  w:'28px'},
+  {id:'spt_fin',   label:'Índice SPT Final',     vis: true,  w:'28px'},
+  {id:'amostra',   label:'Nº Amostra',           vis: true,  w:'19px'},
+  {id:'prof_cam',  label:'Prof. Camadas (m)',     vis: true,  w:'38px'},
+  {id:'desc',      label:'Descrição do Solo',     vis: true,  w:'1fr'},
+  {id:'diag',      label:'Diagrama SPT',          vis: true,  w:'188px'},
+];
+let colOrder = ALL_COLS.map(c=>c.id);
+let colVis   = {};
+ALL_COLS.forEach(c => { colVis[c.id] = c.vis; });
+
+// ═══════════════════════════════════════════════════════
+// TABS & PANELS & MANAGER
+// ═══════════════════════════════════════════════════════
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+function togglePanel(h) {
+  const b = h.nextElementSibling, a = h.querySelector('span');
+  b.classList.toggle('collapsed');
+  a.textContent = b.classList.contains('collapsed') ? '▸' : '▾';
+}
+function buildColManager() {
+  const cont = document.getElementById('col-manager');
+  cont.innerHTML = '';
+  colOrder.forEach(id => {
+    const def = ALL_COLS.find(c => c.id === id);
+    if (!def) return;
+    const item = document.createElement('div');
+    item.className = 'col-item';
+    item.dataset.id = id;
+    item.draggable = true;
+    item.innerHTML = `
+      <span class="drag-handle" title="Arrastar">⠿</span>
+      <input type="checkbox" ${colVis[id] ? 'checked' : ''} onchange="colVis['${id}']=this.checked">
+      <span class="col-label">${def.label}</span>`;
+    item.addEventListener('dragstart', e => {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', id);
+      item.classList.add('dragging');
+    });
+    item.addEventListener('dragend', () => item.classList.remove('dragging'));
+    item.addEventListener('dragover', e => { e.preventDefault(); item.classList.add('drag-over'); });
+    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      item.classList.remove('drag-over');
+      const fromId = e.dataTransfer.getData('text/plain');
+      const fromIdx = colOrder.indexOf(fromId);
+      const toIdx   = colOrder.indexOf(id);
+      if (fromIdx !== toIdx) {
+        colOrder.splice(fromIdx, 1);
+        colOrder.splice(toIdx, 0, fromId);
+        buildColManager();
+      }
+    });
+    cont.appendChild(item);
+  });
+}
+
+function loadLogo(who, inp) {
+  const f = inp.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    logos[who] = e.target.result;
+    document.getElementById('li-' + who).src = logos[who];
+    document.getElementById('li-' + who).style.display = 'block';
+    document.getElementById('lp-' + who).style.display = 'none';
+    document.getElementById('lc-' + who).style.display = 'block';
+  };
+  r.readAsDataURL(f);
+}
+function clearLogo(who) {
+  logos[who] = null;
+  document.getElementById('li-' + who).style.display = 'none';
+  document.getElementById('lp-' + who).style.display = '';
+  document.getElementById('lc-' + who).style.display = 'none';
+}
+
+function openColorPicker(type, rowIdx, dotEl) {
+  activeColorTarget = {type, row: rowIdx};
+  const pop = document.getElementById('color-popup');
+  const pal = document.getElementById('soil-palette');
+  const ci  = document.getElementById('custom-color');
+  pal.innerHTML = '';
+  PALETTE.forEach(c => {
+    const b = document.createElement('button');
+    b.style.background = c; b.title = c;
+    b.onclick = () => { applyColor(c); closeColorPicker(); };
+    pal.appendChild(b);
+  });
+  ci.value = dotEl.dataset.color || '#c8a850';
+  ci.oninput = () => applyColor(ci.value);
+  const rect = dotEl.getBoundingClientRect();
+  pop.style.left = Math.min(rect.right + 8, window.innerWidth - 200) + 'px';
+  pop.style.top  = Math.min(rect.top, window.innerHeight - 270) + 'px';
+  pop.style.display = 'block';
+}
+function applyColor(c) {
+  if (!activeColorTarget) return;
+  const sel = activeColorTarget.type === 'cam'
+    ? `.sc-dot-cam[data-row="${activeColorTarget.row}"]`
+    : `.sc-dot-spt[data-row="${activeColorTarget.row}"]`;
+  const dot = document.querySelector(sel);
+  if (dot) { dot.style.background = c; dot.dataset.color = c; }
+}
+function closeColorPicker() {
+  document.getElementById('color-popup').style.display = 'none';
+  activeColorTarget = null;
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#color-popup') && !e.target.closest('.sc-dot') && !e.target.closest('.sc-dot-cam') && !e.target.closest('.sc-dot-spt')) closeColorPicker();
+});
+
+function addCamadaRow(prof = '', desc = '', color = '') {
+  const tbody = document.getElementById('cam-tbody');
+  const idx   = tbody.rows.length;
+  const col   = color || DEF_CAM_COLORS[idx % DEF_CAM_COLORS.length];
+  const tr    = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" class="cam-prof" value="${prof}" placeholder="0.0" style="width:48px"></td>
+    <td><input type="text" class="cam-desc left" value="${desc}" placeholder="Deixe em branco p/ Limite"></td>
+    <td style="padding:1px 2px;text-align:center">
+      <div class="sc-dot sc-dot-cam" data-color="${col}" data-row="${idx}" style="background:${col};margin:auto" onclick="openColorPicker('cam',${idx},this)"></div>
+    </td>
+    <td style="padding:1px 2px">
+      <button onclick="this.closest('tr').remove();renumberCamRows()" style="background:var(--err);color:#fff;border:none;border-radius:2px;padding:1px 5px;cursor:pointer;font-size:10px">✕</button>
+    </td>`;
+  tbody.appendChild(tr);
+}
+function renumberCamRows() {
+  document.querySelectorAll('.sc-dot-cam').forEach((d, i) => { d.dataset.row = i; d.setAttribute('onclick', `openColorPicker('cam',${i},this)`); });
+}
+function getCamadas() {
+  const rows = [];
+  document.querySelectorAll('#cam-tbody tr').forEach(tr => {
+    const p = parseFloat(tr.querySelector('.cam-prof')?.value);
+    const d = tr.querySelector('.cam-desc')?.value || '';
+    const c = tr.querySelector('.sc-dot-cam')?.dataset.color || '#e8d8b0';
+    if (!isNaN(p)) rows.push({prof: p, desc: d, color: c});
+  });
+  return rows.sort((a, b) => a.prof - b.prof);
+}
+
+function updateRowNumbers() {
+  const trs = document.querySelectorAll('#spt-tbody tr');
+  if(trs.length === 0) return;
+  const i0 = trs[0].querySelector('.ini')?.value?.trim();
+  const f0 = trs[0].querySelector('.fin')?.value?.trim();
+  const startsZero = (i0 === '0' && f0 === '0');
+
+  trs.forEach((tr, i) => {
+    const num = startsZero ? i : i + 1;
+    tr.querySelector('.row-num').textContent = num;
+    const profInp = tr.querySelector('.spt-prof');
+    if (!profInp.value) profInp.placeholder = num;
+  });
+}
+
+function rebuildSptTable() {
+  const n     = parseInt(document.getElementById('num_amostras').value) || 20;
+  const tbody = document.getElementById('spt-tbody');
+  const saved = [];
+  tbody.querySelectorAll('tr').forEach((tr, i) => {
+    saved[i] = {
+      ini:  tr.querySelector('.ini')?.value  || '',
+      fin:  tr.querySelector('.fin')?.value  || '',
+      prof: tr.querySelector('.spt-prof')?.value || ''
+    };
+  });
+  tbody.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const s  = saved[i] || {};
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="row-num">${i + 1}</td>
+      <td><input type="text" class="ini" value="${s.ini || ''}" placeholder="-" style="width:38px" onkeyup="updateRowNumbers()"></td>
+      <td><input type="text" class="fin" value="${s.fin || ''}" placeholder="-" style="width:38px" onkeyup="updateRowNumbers()"></td>
+      <td><input type="text" class="spt-prof" value="${s.prof || ''}" placeholder="${i + 1}" style="width:38px"></td>`;
+    tbody.appendChild(tr);
+  }
+  updateRowNumbers();
+}
+
+function getSptRows() {
+  const rows = [];
+  const trs = document.querySelectorAll('#spt-tbody tr');
+  let startsZero = false;
+  if (trs.length > 0) {
+    const i0 = trs[0].querySelector('.ini')?.value?.trim();
+    const f0 = trs[0].querySelector('.fin')?.value?.trim();
+    if(i0 === '0' && f0 === '0') startsZero = true;
+  }
+
+  trs.forEach((tr, i) => {
+    const profRaw = tr.querySelector('.spt-prof')?.value;
+    const defaultNum = startsZero ? i : i + 1;
+    const prof    = (profRaw && profRaw.trim() !== '') ? parseFloat(profRaw) : defaultNum;
+    rows.push({
+      num:  defaultNum,
+      ini:  tr.querySelector('.ini')?.value  || '',
+      fin:  tr.querySelector('.fin')?.value  || '',
+      prof
+    });
+  });
+  return rows;
+}
+
+function addRevestRow(p = '', c = '') {
+  const list = document.getElementById('revest-list');
+  const d    = document.createElement('div');
+  d.style.cssText = 'display:flex;gap:5px;align-items:center;margin-bottom:5px';
+  d.innerHTML = `
+    <div class="fg" style="flex:1;margin:0"><input type="number" class="rv-p" step="0.01" value="${p}" placeholder="Prof.(m)" style="width:100%"></div>
+    <div class="fg" style="flex:1;margin:0"><input type="number" class="rv-c" step="0.001" value="${c}" placeholder="Cota(m)" style="width:100%"></div>
+    <button onclick="this.parentElement.remove()" style="background:var(--err);color:#fff;border:none;border-radius:3px;padding:3px 7px;cursor:pointer;font-size:11px;flex-shrink:0">✕</button>`;
+  list.appendChild(d);
+}
+
+const v       = id => document.getElementById(id)?.value?.trim() || '';
+const fmtDate = iso => { if (!iso) return ''; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; };
+const ptNum   = n  => (n === '' || n == null) ? '' : String(n).replace('.', ',');
+
+function parseSpt(s) {
+  if (!s || s === '-' || s.trim() === '') return null;
+  s = s.trim();
+  const impenet = s.endsWith('!');
+  const raw     = impenet ? s.slice(0, -1) : s;
+  const numPart = raw.includes('/') ? parseInt(raw.split('/')[0]) : parseFloat(raw);
+  return { raw, val: isNaN(numPart) ? null : numPart, impenet };
+}
+
+function generateReport() {
+  const sptRows = getSptRows();
+  const camadas = getCamadas();
+
+  const empresa  = v('empresa_nome'), crea = v('empresa_crea'), resp = v('resp_nome'), empEnd = v('empresa_end');
+  const empSub   = v('empresa_sub');
+  const cliente  = v('cliente'), obra = v('obra'), local = v('local');
+  const rptNum   = v('relatorio_num'), folha = v('folha') || '01';
+  const dataEmis = fmtDate(v('data_emissao')), obs = v('observacoes');
+  const furoNum  = v('furo_num'), cotaFuro = v('furo_cota');
+  const naIniRaw = v('na_ini');
+  const naFinRaw = v('na_fin');
+  // Valor numérico estrito para a faixa azul no gráfico
+  const naIniVal = parseFloat(naIniRaw.replace(',', '.')) || null;
+  const naFinVal = parseFloat(naFinRaw.replace(',', '.')) || null;
+  
+  const dataNaI  = fmtDate(v('data_na_ini')), dataNaF = fmtDate(v('data_na_fin'));
+  const dataIni  = fmtDate(v('data_inicio')), dataTerm = fmtDate(v('data_termino'));
+  const diamExt  = v('diam_ext'), diamInt = v('diam_int'), diamH = v('diam_haste');
+  const pesoM    = v('peso_mart'), altQ = v('alt_queda'), metCrav = v('metodo_crav');
+
+  function fmtNA(raw) {
+      if (!raw) return '—';
+      const num = parseFloat(raw.replace(',', '.'));
+      return isNaN(num) ? raw : ptNum(num.toFixed(2)) + ' m';
+  }
+
+  const ROW_H     = 16;
+  const DW        = 180;
+  const SCALE_MAX = 50;
+  const xPos = val => Math.min(val / SCALE_MAX, 1) * DW;
+  let totalH = sptRows.length * ROW_H;
+
+  const filledRows = sptRows.filter(r => parseSpt(r.ini) || parseSpt(r.fin));
+  const lastFilledIdx = filledRows.length > 0 ? sptRows.indexOf(filledRows[filledRows.length - 1]) : sptRows.length - 1;
+
+  const COL_DEFS = {
+    revest:   {w:'14px',  hdr:'Revestimento'},
+    cota_rn:  {w:'34px',  hdr:'Cota R.N.'},
+    spt_ini:  {w:'28px',  hdr:'Índice SPT Inicial'},
+    spt_fin:  {w:'28px',  hdr:'Índice SPT Final'},
+    amostra:  {w:'19px',  hdr:'Nº Amostra'},
+    prof_cam: {w:'38px',  hdr:'Prof. Camadas (m)'},
+    desc:     {w:'1fr',   hdr:'Descrição do Solo'},
+    diag:     {w:'188px', hdr:'Diagrama SPT'},
+  };
+  const activeCols = colOrder.filter(id => colVis[id]);
+  const gridCols = activeCols.map(id => COL_DEFS[id].w).join(' ');
+
+  const vh = (txt, w) => `<div style="border-right:1px solid #aaa;border-bottom:1px solid #aaa;padding:1px;font-size:4.6pt;font-weight:700;text-align:center;writing-mode:vertical-rl;transform:rotate(180deg);height:58px;display:flex;align-items:center;justify-content:center;line-height:1.1;background:#ece8da;${w?'width:'+w:''}">` + txt + `</div>`;
+  const dc = (content, extra = '', bg = '') => `<div style="border-right:1px solid #ddd;border-bottom:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:6pt;text-align:center;min-height:${ROW_H}px;font-family:'IBM Plex Mono',monospace;${bg?'background:'+bg+';':''}${extra}">${content}</div>`;
+
+  let html = `<div style="display:flex; flex-direction:column; align-items:flex-start;">
+    <div class="report-sheet">`;
+
+  // HEADER - All Left Aligned
+  const empLogoCell = logos.empresa ? `<div style="padding:4px 6px;border-right:1px solid #ddd;display:flex;align-items:center;justify-content:center;min-width:48px"><img src="${logos.empresa}" style="max-height:44px;max-width:64px;object-fit:contain;background:transparent"></div>` : '';
+  const cliLogoCell = logos.cliente ? `<div style="padding:2px 5px;border-right:1px solid #ddd;display:flex;align-items:center;justify-content:center;min-width:40px"><img src="${logos.cliente}" style="max-height:36px;max-width:56px;object-fit:contain;background:transparent"></div>` : '';
+  html += `<div style="display:grid;grid-template-columns:1fr 1fr;border:1.5px solid #111">
+    <div style="border-right:1px solid #ccc;display:flex;align-items:stretch">
+      ${empLogoCell}
+      <div style="padding:5px 8px;font-size:7pt;display:flex;flex-direction:column;justify-content:center;text-align:left;">
+        <div style="font-size:12pt;font-weight:800;line-height:1.1;color:#0f2441">${empresa || 'EMPRESA'}</div>
+        ${empSub ? `<div style="font-size:4.5pt;color:#666;letter-spacing:.1em;text-transform:uppercase;margin-top:1px">${empSub}</div>` : ''}
+        <div style="font-size:5.5pt;color:#444;margin-top:3px;font-weight:600">${resp || '&nbsp;'}</div>
+        <div style="font-size:5.5pt;color:#555">CREA-${crea || '&nbsp;'}</div>
+        <div style="font-size:5pt;color:#777;margin-top:1px">${empEnd || '&nbsp;'}</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:stretch">
+      ${cliLogoCell}
+      <div style="padding:5px 8px;font-size:7pt;display:flex;flex-direction:column;justify-content:center;text-align:left;">
+        <div><b>Cliente:</b> ${cliente || '&nbsp;'}</div>
+        <div><b>Obra:</b> ${obra || '&nbsp;'}</div>
+        <div><b>Local:</b> ${local || '&nbsp;'}</div>
+      </div>
+    </div>
+  </div>`;
+
+  // TITLE BAND
+  html += `<div style="display:grid;grid-template-columns:1fr 1fr;border:1.5px solid #111;border-top:none">
+    <div style="padding:4px 8px;border-right:1px solid #ccc;text-align:left;">
+      <div style="font-size:9.5pt;font-weight:800;color:#0f2441">Relatório de Sondagem</div>
+      <div style="font-size:7pt;font-weight:700;margin-top:1px">Furo <b>${furoNum || '—'}</b>&nbsp;&nbsp;Cota <b>${cotaFuro ? ptNum(cotaFuro) : '—'}</b></div>
+      <div style="font-size:5.5pt;color:#666">SPT – Standard Penetration Test | Camadas – Classificação dos solos</div>
+    </div>
+    <div style="padding:4px 8px;display:flex;flex-direction:column;justify-content:center;gap:2px;text-align:left;">
+      <div style="font-size:8.5pt;font-weight:800;color:#0f2441;text-align:left;">N° ${rptNum || '&nbsp;'}</div>
+      <div style="display:flex;gap:6px;justify-content:flex-start;font-size:5.5pt;align-items:center;flex-wrap:wrap">
+        <span><span style="border-top:1.5px solid #0f2441;display:inline-block;width:16px;vertical-align:middle"></span> SPT Inicial</span>
+        <span><span style="border-top:1.5px dashed #4a90c4;display:inline-block;width:16px;vertical-align:middle"></span> SPT Final</span>
+        <span><span style="display:inline-block;width:6px;height:9px;background:rgba(30,120,220,.32);border:1px solid #3a80d8;vertical-align:middle;margin-right:1px"></span>NA</span>
+      </div>
+    </div>
+  </div>`;
+
+  // COLUMN HEADERS
+  html += `<div style="display:grid;grid-template-columns:${gridCols};border:1.5px solid #111;border-top:none">`;
+  activeCols.forEach(id => {
+    if (id === 'desc') {
+      html += `<div style="border-right:1px solid #aaa;border-bottom:1px solid #aaa;padding:2px 3px;font-size:5.2pt;font-weight:700;background:#ece8da;display:flex;align-items:center;justify-content:center">${COL_DEFS.desc.hdr}</div>`;
+    } else if (id === 'diag') {
+      html += `<div style="border-bottom:1px solid #aaa;padding:2px 3px;background:#ece8da">
+        <div style="font-size:4.6pt;font-weight:700;margin-bottom:1px">d=1 3/8"</div>
+        <div style="font-size:4.5pt;margin-bottom:2px">
+          <span style="border-top:1.5px solid #0f2441;display:inline-block;width:11px;vertical-align:middle"></span> Ini&nbsp;
+          <span style="border-top:1.5px dashed #4a90c4;display:inline-block;width:11px;vertical-align:middle"></span> Fin&nbsp;
+          <span style="display:inline-block;width:5px;height:7px;background:rgba(30,120,220,.32);border:1px solid #3a80d8;vertical-align:middle"></span> NA
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:5pt;font-weight:700;border-top:1px solid #bbb;padding-top:1px">
+          <span>0</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span>
+        </div>
+      </div>`;
+    } else {
+      html += vh(COL_DEFS[id].hdr);
+    }
+  });
+  html += `</div>`;
+
+
+  // =========================================================================
+  // SISTEMA DE CÁLCULO DE LIMITES (BOUNDARIES) E ESCALA DINÂMICA
+  // =========================================================================
+  let bounds = [];
+  let texts = [];
+  
+  if (camadas.length > 0) {
+      bounds = camadas.map(c => ({
+          prof: c.prof,
+          trueY: c.prof * ROW_H,
+          visY: c.prof * ROW_H,
+          text: ptNum(c.prof.toFixed(2)),
+          desc: c.desc,
+          color: c.color
+      }));
+
+      if (bounds[0].prof === 0) {
+          bounds[0].visY = 0;
+          bounds[0].trueY = 0;
+      }
+
+      bounds.push({
+          prof: sptRows.length,
+          trueY: sptRows.length * ROW_H,
+          visY: sptRows.length * ROW_H,
+          isBottom: true
+      });
+
+      const MIN_H = 16; 
+
+      for (let k = 1; k < bounds.length; k++) {
+          if (bounds[k].visY < bounds[k-1].visY + MIN_H) {
+              bounds[k].visY = bounds[k-1].visY + MIN_H;
+          }
+      }
+
+      let idealTotalH = sptRows.length * ROW_H;
+      if (bounds[bounds.length - 1].visY > idealTotalH) {
+          bounds[bounds.length - 1].visY = idealTotalH;
+          for (let k = bounds.length - 1; k > 0; k--) {
+              if (bounds[k].visY - bounds[k-1].visY < MIN_H) {
+                  bounds[k-1].visY = bounds[k].visY - MIN_H;
+              }
+          }
+          if (bounds[0].visY < 0) {
+              bounds[0].visY = 0;
+              for (let k = 1; k < bounds.length; k++) {
+                  if (bounds[k].visY < bounds[k-1].visY + MIN_H) {
+                      bounds[k].visY = bounds[k-1].visY + MIN_H;
+                  }
+              }
+          }
+      }
+      if (bounds[bounds.length - 1].visY > idealTotalH) {
+          totalH = bounds[bounds.length - 1].visY;
+      }
+
+      texts = bounds.slice(0, -1).map(l => ({ exact: l.trueY, visLine: l.visY, y: l.visY - 6, h: 12, val: l.text }));
+      for(let k = 1; k < texts.length; k++){
+         if(texts[k].y < texts[k-1].y + texts[k-1].h) texts[k].y = texts[k-1].y + texts[k-1].h;
+      }
+      if(texts.length > 0 && texts[0].y < 0) {
+          texts[0].y = 0;
+          for(let k = 1; k < texts.length; k++){
+              if(texts[k].y < texts[k-1].y + texts[k-1].h) texts[k].y = texts[k-1].y + texts[k-1].h;
+          }
+      }
+  }
+
+  // DATA ROWS GRID
+  html += `<div style="display:grid;grid-template-columns:${gridCols};grid-template-rows:repeat(${sptRows.length}, ${ROW_H}px);border:1.5px solid #111;border-top:none;position:relative;">`;
+  
+  for (let i = 0; i < sptRows.length; i++) {
+    const row   = sptRows[i];
+    const si    = parseSpt(row.ini);
+    const sf    = parseSpt(row.fin);
+    const isImp = si?.impenet || sf?.impenet;
+    const rowBg = isImp ? '#fff5f5' : (i % 2 === 0 ? '#ffffff' : '#f7f4ec');
+
+    const rd      = Math.round(row.prof);
+    const showCot = rd > 0 && rd % 5 === 0 && Math.abs(row.prof - rd) < 0.55;
+    const cotaV   = cotaFuro ? (parseFloat(cotaFuro) - row.prof).toFixed(3).replace('.', ',') : '';
+    
+    activeCols.forEach((id, colIdx) => {
+      const explicitGridPos = `grid-row:${i + 1}; grid-column:${colIdx + 1};`;
+      
+      if (id === 'prof_cam') {
+         if (i === 0) { 
+           let camHtml = `<div style="grid-row: 1 / span ${sptRows.length}; grid-column: ${colIdx + 1}; position: relative; border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; background: #fff; overflow:visible;">`;
+           
+           if(bounds.length > 0) {
+               camHtml += `<svg style="position:absolute;top:0;left:0;width:100%;height:${Math.max(totalH, sptRows.length * ROW_H)}px;pointer-events:none;z-index:1;overflow:visible;">`;
+               bounds.slice(1, -1).forEach(b => {
+                   camHtml += `<line x1="0" y1="${b.trueY}" x2="100%" y2="${b.visY}" stroke="#888" stroke-width="1.2" stroke-dasharray="3,2"/>`;
+               });
+               texts.forEach((t, k) => {
+                   if (Math.abs(t.y + 6 - t.visLine) > 2 && k > 0) {
+                       camHtml += `<line x1="0" y1="${t.visLine}" x2="18" y2="${t.y + 6}" stroke="#aaa" stroke-width="1"/>`;
+                   }
+               });
+               camHtml += `</svg>`;
+
+               texts.forEach(t => {
+                   camHtml += `<div style="position: absolute; top: ${t.y}px; right: 2px; width: 100%; height: ${t.h}px; font-size: 5pt; font-weight: bold; text-align: right; line-height:${t.h}px; z-index:3; background:rgba(255,255,255,0.7);">${t.val}</div>`;
+               });
+           }
+           camHtml += `</div>`;
+           html += camHtml;
+         }
+      }
+      
+      else if (id === 'desc') {
+         if (i === 0) { 
+           let descHtml = `<div style="grid-row: 1 / span ${sptRows.length}; grid-column: ${colIdx + 1}; position: relative; border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; background: #fff; overflow:hidden;">`;
+           
+           if(bounds.length > 0) {
+               for(let k = 0; k < bounds.length - 1; k++) {
+                   let topY = bounds[k].visY;
+                   let botY = bounds[k+1].visY;
+                   let h = botY - topY;
+                   let bg = bounds[k].color ? `${bounds[k].color}cc` : 'transparent'; 
+                   
+                   let isLim = !bounds[k].desc || bounds[k].desc.trim() === '';
+                   let descTxt = isLim ? `<div style="width:100%;text-align:center;font-weight:700;line-height:1.2;margin-top:2px;">LIMITE DE SONDAGEM / IMPENETRÁVEL À PERCUSSÃO</div>` : bounds[k].desc;
+                   let descStyle = isLim ? 'color:#c0392b;' : 'color:#111;';
+                   let borderTop = k > 0 ? 'border-top: 1px dashed #777;' : '';
+
+                   descHtml += `<div style="position: absolute; top: ${topY}px; left: 0; width: 100%; height: ${h}px; background: ${bg}; ${borderTop} box-sizing: border-box; display: flex; align-items: center; justify-content: flex-start; padding: 4px 6px; font-family:'IBM Plex Sans',sans-serif; font-size: 6pt; text-align: left; line-height: 1.1; z-index:3; text-shadow: 0px 0px 3px rgba(255,255,255,0.9); ${descStyle}">
+                       ${descTxt}
+                   </div>`;
+               }
+           }
+           descHtml += `</div>`;
+           html += descHtml;
+         }
+      }
+      
+      else {
+        switch (id) {
+          case 'revest':
+            html += dc(showCot && cotaV ? `<span style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:4pt;font-weight:700;color:#1a4a8a">${cotaV}</span>` : '', explicitGridPos + 'padding:0;', rowBg);
+            break;
+          case 'cota_rn': html += dc('', explicitGridPos, rowBg); break;
+          case 'spt_ini':
+            html += dc(si ? (si.impenet ? `<span style="color:#c0392b;font-size:5pt;font-weight:700">${si.raw}</span>` : (si.val !== null ? `<span style="color:#2a6090">${si.raw}</span>` : si.raw)) : '', explicitGridPos, rowBg);
+            break;
+          case 'spt_fin':
+            html += dc(sf ? (sf.impenet ? `<span style="color:#c0392b;font-size:5pt;font-weight:700">${sf.raw}</span>` : (sf.val !== null ? `<b style="color:#0f2441">${sf.raw}</b>` : sf.raw)) : '', explicitGridPos, rowBg);
+            break;
+          case 'amostra': html += dc(`<b>${row.num}</b>`, explicitGridPos + 'font-size:6.5pt;', rowBg); break;
+          case 'diag': 
+            html += `<div class="${i===0 ? 'dr-0' : ''}" style="${explicitGridPos} border-right:1px solid #ddd; border-bottom:1px solid #ddd; background:${rowBg}; position:relative; box-sizing:border-box;"></div>`; 
+            break;
+        }
+      }
+    });
+  }
+  html += `</div>`;
+
+  // FOOTER (Removed Nível d'Água Title, keeping only parameters)
+  html += `<div style="border:1.5px solid #111;border-top:none;font-size:6pt;width:100%">
+    <div style="display:flex;border-bottom:1px solid #aaa">
+      <div style="padding:2px 7px;border-right:1px solid #aaa;flex:1;line-height:1.7">
+        NA Inic. <b>${fmtNA(naIniRaw)}</b> ${dataNaI}<br>
+        NA Final <b>${fmtNA(naFinRaw)}</b> ${dataNaF}
+      </div>
+      <div style="padding:2px 7px;border-right:1px solid #aaa;flex:1;line-height:1.7">
+        Ø ext. <b>${diamExt || '—'}</b><br>
+        Ø int. <b>${diamInt || '—'}</b>
+      </div>
+      <div style="padding:2px 7px;border-right:1px solid #aaa;flex:1;line-height:1.7">
+        Revest. Ø <b>${diamH || '—'}</b><br>
+        Peso <b>${pesoM || '—'}</b> kg &nbsp; Queda <b>${altQ || '—'}</b> cm
+      </div>
+      <div style="padding:2px 7px;flex:1;line-height:1.7">
+        Execução:<br><b>${dataIni || '—'}</b> a <b>${dataTerm || '—'}</b>
+      </div>
+    </div>
+    <div style="display:flex;border-bottom:1px solid #aaa">
+      <div style="padding:2px 7px;border-right:1px solid #aaa;font-weight:700;min-width:72px">Método</div>
+      <div style="padding:2px 7px;border-right:1px solid #aaa;flex:1">${metCrav || '&nbsp;'}</div>
+      <div style="padding:2px 7px;border-right:1px solid #aaa;font-weight:700;min-width:72px">Obs:</div>
+      <div style="padding:2px 7px;flex:1;white-space:pre-line;font-style:italic">${obs || 'Escreva aqui as observações'}</div>
+    </div>
+    <div style="display:flex">
+      <div style="padding:2px 7px;border-right:1px solid #aaa">&nbsp;</div>
+      <div style="padding:2px 7px;flex:1;text-align:right">${dataEmis || '&nbsp;'} Folha <b>${folha}</b></div>
+    </div>
+  </div></div>
+  <div style="font-size:5pt; color:#aaa; font-style:italic; font-family:'IBM Plex Sans',sans-serif; letter-spacing:.02em; padding-left:2mm; margin-top:2px; text-align:left;">SPT-PLOT v.1.0.0 — Desenvolvido por Eng. Me. João Víctor Santana</div>
+  </div>`;
+
+  document.getElementById('report-preview').innerHTML = html;
+
+  (function () {
+    const iniPts = [{x: xPos(0), y: 0, imp: false}];
+    const finPts = [{x: xPos(0), y: 0, imp: false}];
+    
+    sptRows.forEach((r, i) => {
+      if (i > lastFilledIdx) return;
+      const cy = r.prof * ROW_H;
+      const si = parseSpt(r.ini), sf = parseSpt(r.fin);
+      if (si) {
+        if (si.impenet) iniPts.push({x: xPos(si.val ?? SCALE_MAX), y: cy, imp: true});
+        else if (si.val !== null) iniPts.push({x: xPos(si.val), y: cy, imp: false});
+      }
+      if (sf) {
+        if (sf.impenet) finPts.push({x: xPos(sf.val ?? SCALE_MAX), y: cy, imp: true});
+        else if (sf.val !== null) finPts.push({x: xPos(sf.val), y: cy, imp: false});
+      }
+    });
+
+    function mkPath(pts, col, dash) {
+      if (!pts.length) return '';
+      if (pts.length === 1) return `<circle cx="${pts[0].x}" cy="${pts[0].y}" r="2" fill="${col}"/>`;
+      const d = pts.map((p, i) => (i === 0 ? `M${p.x},${p.y}` : `L${p.x},${p.y}`)).join(' ');
+      return `<path d="${d}" fill="none" stroke="${col}" stroke-width="1.4" ${dash ? `stroke-dasharray="${dash}"` : ''} stroke-linejoin="round" stroke-linecap="round"/>`;
+    }
+
+    let grd = '';
+    [0, 10, 20, 30, 40, 50].forEach(t => {
+      const x = xPos(t);
+      grd += `<line x1="${x}" y1="0" x2="${x}" y2="${totalH}" stroke="#e0e0e0" stroke-width="0.5"/>`;
+    });
+
+    let naBand = '';
+    if (naIniVal !== null || naFinVal !== null) {
+      const naMin = Math.min(naIniVal ?? naFinVal, naFinVal ?? naIniVal);
+      const naMax = Math.max(naIniVal ?? naFinVal, naFinVal ?? naIniVal);
+      const y1 = naMin * ROW_H;
+      const y2 = naMax * ROW_H;
+      const bH = Math.max(y2 - y1, 3);
+      naBand += `<rect x="0" y="${y1}" width="${DW}" height="${bH}" fill="rgba(30,120,220,0.10)" stroke="none"/>`;
+      naBand += `<line x1="0" y1="${y1}" x2="${DW}" y2="${y1}" stroke="#1e78dc" stroke-width="1.5" stroke-dasharray="4,2"/>`;
+      if (Math.abs(naMax - naMin) > 0.01) naBand += `<line x1="0" y1="${y2}" x2="${DW}" y2="${y2}" stroke="#1e78dc" stroke-width="1" stroke-dasharray="2,2" opacity="0.7"/>`;
+      naBand += `<text x="${DW - 1}" y="${y1 - 2}" text-anchor="end" font-size="5" fill="#1e78dc" font-weight="bold" font-family="IBM Plex Sans,sans-serif">NA</text>`;
+    }
+
+    let imp = '';
+    sptRows.forEach((r, i) => {
+      if (i > lastFilledIdx) return;
+      const cy = r.prof * ROW_H;
+      const si = parseSpt(r.ini), sf = parseSpt(r.fin);
+      
+      if (si && si.impenet) {
+        const ix = xPos(si.val ?? SCALE_MAX);
+        imp += `<line x1="${ix - 5}" y1="${cy - 5}" x2="${ix + 5}" y2="${cy + 5}" stroke="#c0392b" stroke-width="2.5"/><line x1="${ix + 5}" y1="${cy - 5}" x2="${ix - 5}" y2="${cy + 5}" stroke="#c0392b" stroke-width="2.5"/>`;
+      }
+      if (sf && sf.impenet) {
+        const fx = xPos(sf.val ?? SCALE_MAX);
+        imp += `<line x1="${fx - 5}" y1="${cy - 5}" x2="${fx + 5}" y2="${cy + 5}" stroke="#c0392b" stroke-width="2.5"/><line x1="${fx + 5}" y1="${cy - 5}" x2="${fx - 5}" y2="${cy + 5}" stroke="#c0392b" stroke-width="2.5"/>`;
+      }
+    });
+
+    const ns  = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('width',  DW);
+    svg.setAttribute('height', totalH);
+    svg.style.cssText = 'position:absolute;top:0;left:0;overflow:visible;pointer-events:none;z-index:2';
+    svg.innerHTML = grd + naBand + mkPath(iniPts, '#0f2441', '') + mkPath(finPts, '#4a90c4', '3,2') + imp;
+    
+    const first = document.querySelector('.dr-0');
+    if (first) {
+      first.style.overflow = 'visible';
+      first.appendChild(svg);
+    }
+  })();
+}
+
+// ═══════════════════════════════════════════════════════
+// EXAMPLES
+// ═══════════════════════════════════════════════════════
+function loadExample(type) {
+  clearAll(true);
+  
+  document.getElementById('empresa_nome').value = 'Amplitude';
+  document.getElementById('empresa_sub').value  = 'Consultoria e Sustentabilidade';
+  document.getElementById('empresa_crea').value = '123456-SP';
+  document.getElementById('resp_nome').value    = 'Matias Alves da Cruz';
+  document.getElementById('empresa_end').value  = 'São Paulo - SP';
+  document.getElementById('cliente').value      = 'Construtora Horizonte';
+  document.getElementById('data_emissao').value = '2026-03-02';
+  document.getElementById('diam_ext').value     = '2 3/8"';
+  document.getElementById('diam_int').value     = '1 3/8"';
+  document.getElementById('diam_haste').value   = '2"';
+  document.getElementById('peso_mart').value    = '65';
+  document.getElementById('alt_queda').value    = '75';
+  document.getElementById('metodo_crav').value  = 'Sondagem à Percussão';
+
+  if (type === 1) { 
+    document.getElementById('obra').value = 'SP51AT - Modelo Amplitude';
+    document.getElementById('local').value = 'Av. Modelo';
+    document.getElementById('furo_num').value = 'SP51AT';
+    document.getElementById('furo_cota').value = '0.000';
+    document.getElementById('prof_total').value = '8';
+    document.getElementById('num_amostras').value = '8';
+    document.getElementById('na_ini').value = 'SECO';
+    document.getElementById('na_fin').value = 'N.F.O.';
+    
+    document.getElementById('cam-tbody').innerHTML = '';
+    addCamadaRow(0.0, 'Aterro de argila arenosa, cor cinza amarelada, de consistência rija a média. presença de pedriscos.', '#d4c080');
+    addCamadaRow(3.0, 'Silte argiloso, cor cinza escuro, de consistência dura a rija.', '#333333');
+    addCamadaRow(5.36, 'Silte argiloso, cor verde acinzentado, de consistência dura.', '#90b870');
+    addCamadaRow(7.00, 'Silte argiloso, cor amarelo acinzentado, de consistência dura.', '#c8a850');
+    addCamadaRow(7.10, '', '#ffffff');
+    
+    rebuildSptTable();
+    const ex1 = [[9, 11], [15, 16], [10, 9], [24, 32], [36, '35/19'], [11, 19], [30, 38], ['30/10!', '-']];
+    fillTableRows(ex1);
+    
+    const trs = document.querySelectorAll('#spt-tbody tr');
+    if (trs[7]) trs[7].querySelector('.spt-prof').value = '7.10';
+  } else if (type === 2) { 
+    document.getElementById('obra').value = 'SP50 - Modelo Amplitude';
+    document.getElementById('local').value = 'Av. Modelo';
+    document.getElementById('furo_num').value = 'SP50';
+    document.getElementById('furo_cota').value = '0.000';
+    document.getElementById('prof_total').value = '7';
+    document.getElementById('num_amostras').value = '7';
+    document.getElementById('na_ini').value = 'SECO';
+    document.getElementById('na_fin').value = 'N.F.O.';
+    
+    document.getElementById('cam-tbody').innerHTML = '';
+    addCamadaRow(0.0, 'Aterro de argila arenosa, cor cinza castanho, de consistência média. presença de pedriscos.', '#a0a0a0');
+    addCamadaRow(2.10, 'Silte argiloso, cor cinza escuro, de consistência rija a muito rija.', '#333333');
+    addCamadaRow(4.05, 'Silte argiloso, cor cinza variegado, de consistência dura.', '#8899aa');
+    addCamadaRow(5.17, 'Silte argiloso, cor amarelo acinzentado, de consistência dura. Presença de fragmentos de rocha.', '#c8a850');
+    addCamadaRow(6.25, '', '#ffffff');
+    
+    rebuildSptTable();
+    const ex2 = [[6, 8], [9, 8], [15, 14], [20, 23], [26, 47], [31, 40], ['39/25!', '-']];
+    fillTableRows(ex2);
+    
+    const trs = document.querySelectorAll('#spt-tbody tr');
+    if (trs[6]) trs[6].querySelector('.spt-prof').value = '6.25';
+  } else if (type === 3) { 
+    document.getElementById('obra').value = 'SP49 - Modelo Amplitude';
+    document.getElementById('local').value = 'Av. Modelo';
+    document.getElementById('furo_num').value = 'SP49';
+    document.getElementById('furo_cota').value = '0.000';
+    document.getElementById('prof_total').value = '4.03';
+    document.getElementById('num_amostras').value = '4';
+    document.getElementById('na_ini').value = 'SECO';
+    document.getElementById('na_fin').value = 'N.F.O.';
+    
+    document.getElementById('cam-tbody').innerHTML = '';
+    addCamadaRow(0.0, 'Aterro de argila arenosa, cor preto amarelado, de consistência rija a dura. presença de pedriscos.', '#a07858');
+    addCamadaRow(2.00, 'Silte argiloso, cor cinza escuro, de consistência média.', '#333333');
+    addCamadaRow(3.60, 'Silte argiloso, cor amarelo acinzentado, de consistência dura. Presença de fragmentos de rocha.', '#c8a850');
+    addCamadaRow(4.03, '', '#ffffff');
+    
+    rebuildSptTable();
+    const ex3 = [[10, 12], [23, 31], [13, 10], ['10/03!', '-']];
+    fillTableRows(ex3);
+    
+    const trs = document.querySelectorAll('#spt-tbody tr');
+    if (trs[3]) trs[3].querySelector('.spt-prof').value = '4.03';
+  }
+  generateReport();
+}
+
+function fillTableRows(data) {
+  const trs = document.querySelectorAll('#spt-tbody tr');
+  data.forEach((d, i) => {
+    if (!trs[i]) return;
+    trs[i].querySelector('.ini').value = d[0];
+    trs[i].querySelector('.fin').value = d[1];
+  });
+  updateRowNumbers();
+}
+
+// ═══════════════════════════════════════════════════════
+// CLEAR & FILES
+// ═══════════════════════════════════════════════════════
+function clearAll(skipConfirm = false) {
+  if (!skipConfirm && !confirm('Limpar todos os dados?')) return;
+  document.querySelectorAll('.sidebar input:not([type=file]), .sidebar textarea').forEach(el => {
+    if (el.type !== 'checkbox' && el.id !== 'num_amostras') el.value = '';
+  });
+  document.getElementById('revest-list').innerHTML = '';
+  document.getElementById('cam-tbody').innerHTML   = '';
+  clearLogo('empresa'); clearLogo('cliente');
+  document.getElementById('report-preview').innerHTML = '<div style="color:var(--muted);text-align:center;padding:80px 20px;font-size:.9rem">Preencha os dados e clique em <b>▶ Gerar</b></div>';
+  updateRowNumbers();
+}
+
+let currentSaveFileName = 'relatorio_spt';
+function salvar() { if (!document.querySelector('.report-sheet')) { alert('Gere o relatório!'); return; } _doSalvar(currentSaveFileName); }
+function salvarComo() { if (!document.querySelector('.report-sheet')) { alert('Gere o relatório!'); return; } const nome = prompt('Nome:', currentSaveFileName); if (nome) { currentSaveFileName = nome; _doSalvar(nome); } }
+function _doSalvar(nome) {
+  const data = {
+    empresa_nome: v('empresa_nome'), empresa_sub: v('empresa_sub'), empresa_crea: v('empresa_crea'), resp_nome: v('resp_nome'), empresa_end: v('empresa_end'),
+    cliente: v('cliente'), obra: v('obra'), local: v('local'), relatorio_num: v('relatorio_num'), folha: v('folha'),
+    data_emissao: v('data_emissao'), observacoes: v('observacoes'), furo_num: v('furo_num'), furo_cota: v('furo_cota'), prof_total: v('prof_total'),
+    na_ini: v('na_ini'), na_fin: v('na_fin'), data_na_ini: v('data_na_ini'), data_na_fin: v('data_na_fin'), data_inicio: v('data_inicio'), data_termino: v('data_termino'),
+    diam_ext: v('diam_ext'), diam_int: v('diam_int'), diam_haste: v('diam_haste'), peso_mart: v('peso_mart'), alt_queda: v('alt_queda'), metodo_crav: v('metodo_crav'),
+    logos: {empresa: logos.empresa, cliente: logos.cliente}, colOrder, colVis, camadas: getCamadas(),
+    revest: [...document.querySelectorAll('#revest-list > div')].map(d => ({ p: d.querySelector('.rv-p')?.value || '', c: d.querySelector('.rv-c')?.value || '' })),
+    spt: getSptRows().map(r => ({ini: r.ini, fin: r.fin, prof: r.prof})), num_amostras: v('num_amostras'),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome + '.spt.json'; a.click();
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT PDF
+// ═══════════════════════════════════════════════════════
+function exportarPDF() {
+  const wrapper = document.querySelector('#report-preview').innerHTML;
+  if (!wrapper || !document.querySelector('.report-sheet')) { alert('Gere o relatório primeiro!'); return; }
+
+  const printWin = window.open('', '_blank');
+  printWin.document.write(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Relatório SPT</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  margin:0; padding:0;
+  background:#fff;
+  font-family:'IBM Plex Sans',sans-serif;
+  -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  display: flex; flex-direction: column; align-items: center;
+}
+@page{
+  size: 210mm auto; 
+  margin: 0;
+}
+.report-sheet{
+  width:210mm !important;
+  max-width:210mm !important;
+  min-width:210mm !important;
+  height: fit-content !important;
+  box-shadow:none!important;
+  border:none!important;
+  padding: 10mm 10mm 5mm 10mm !important;
+  margin: 0 auto;
+}
+*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+</style>
+</head>
+<body>
+${wrapper}
+<script>
+  window.onload = function() {
+    setTimeout(function(){
+      window.print();
+      window.onafterprint = function(){ window.close(); };
+    }, 600);
+  };
+<\/script>
+</body>
+</html>`);
+  printWin.document.close();
+}
+
+function abrirArquivo() {
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.spt.json,.json';
+  inp.onchange = e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => { try { _carregarDados(JSON.parse(ev.target.result)); } catch(err) { alert('Erro: ' + err.message); } };
+    reader.readAsText(file);
+  }; inp.click();
+}
+
+function _carregarDados(d) {
+  const campos = ['empresa_nome','empresa_sub','empresa_crea','resp_nome','empresa_end','cliente','obra','local','relatorio_num','folha','data_emissao','observacoes',
+    'furo_num','furo_cota','prof_total','na_ini','na_fin','data_na_ini','data_na_fin','data_inicio','data_termino','diam_ext','diam_int','diam_haste','peso_mart','alt_queda','metodo_crav'];
+  campos.forEach(id => { const el = document.getElementById(id); if (el && d[id] !== undefined) el.value = d[id]; });
+
+  if (d.logos) {
+    if (d.logos.empresa) { logos.empresa = d.logos.empresa; document.getElementById('li-empresa').src = logos.empresa; document.getElementById('li-empresa').style.display = 'block'; document.getElementById('lp-empresa').style.display = 'none'; document.getElementById('lc-empresa').style.display = 'block'; }
+    if (d.logos.cliente) { logos.cliente = d.logos.cliente; document.getElementById('li-cliente').src = logos.cliente; document.getElementById('li-cliente').style.display = 'block'; document.getElementById('lp-cliente').style.display = 'none'; document.getElementById('lc-cliente').style.display = 'block'; }
+  }
+
+  if (d.colOrder) colOrder = d.colOrder; if (d.colVis) colVis = d.colVis;
+  buildColManager();
+
+  if (d.camadas) { document.getElementById('cam-tbody').innerHTML = ''; d.camadas.forEach(cam => addCamadaRow(cam.prof, cam.desc, cam.color)); }
+  if (d.revest) { document.getElementById('revest-list').innerHTML = ''; d.revest.forEach(r => addRevestRow(r.p, r.c)); }
+
+  if (d.spt && d.num_amostras) {
+    document.getElementById('num_amostras').value = d.num_amostras;
+    rebuildSptTable();
+    const trs = document.querySelectorAll('#spt-tbody tr');
+    d.spt.forEach((s, i) => {
+      if (!trs[i]) return;
+      trs[i].querySelector('.ini').value = s.ini || '';
+      trs[i].querySelector('.fin').value = s.fin || '';
+      trs[i].querySelector('.spt-prof').value = s.prof !== (i+1) ? String(s.prof) : '';
+    });
+  }
+  updateRowNumbers();
+  generateReport();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  buildColManager();
+  rebuildSptTable();
+  addRevestRow();
+  addCamadaRow(0.0, '', DEF_CAM_COLORS[0]);
+});
+</script>
+
+</body>
+</html>
